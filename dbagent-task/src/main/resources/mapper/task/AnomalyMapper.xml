@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dbagent.task.mapper.AnomalyMapper">
+    <resultMap id="BaseResultMap" type="com.dbagent.task.anomaly.domain.AnomalyResult">
+        <id property="id" column="id"/>
+        <result property="instanceId" column="instance_id"/>
+        <result property="type" column="type"/>
+        <result property="detail" column="detail"/>
+        <result property="time" column="time"/>
+    </resultMap>
+    <insert id="addAnomaly">
+        insert into user_instance_anomaly(instance_id, type, detail, time)
+        values (#{instanceId}, #{type}, #{detail}, #{time})
+    </insert>
+    <insert id="addAnomalys">
+        insert into user_instance_anomaly(instance_id, type, detail, time)
+        values
+        <foreach collection="anomalyResults" item="anomaly" separator=",">
+            (#{anomaly.instanceId}, #{anomaly.type}, #{anomaly.detail}, #{anomaly.time})
+        </foreach>
+    </insert>
+    <delete id="deleteAnomalyByInstanceIdAndType">
+        delete
+        from user_instance_anomaly
+        where instance_id = #{instanceId}
+          and type = #{type}
+    </delete>
+    <select id="getAnomalyResults" resultType="com.dbagent.task.anomaly.domain.AnomalyResult">
+        select *
+        from user_instance_anomaly
+        where instance_id = #{instanceId}
+          and type = #{type}
+        order by time
+        limit #{offset}, #{limit}
+    </select>
+</mapper>

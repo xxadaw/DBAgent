@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dbagent.task.mapper.MetricsMapper">
+    <resultMap id="BaseResultMap" type="com.dbagent.task.domain.InstanceMetrics">
+        <id property="id" column="id"/>
+        <result property="instanceId" column="instance_id"/>
+        <result property="metrics" column="metrics"/>
+        <result property="sysMetrics" column="sys_metrics"/>
+        <result property="collectTime" column="collect_time"/>
+    </resultMap>
+
+    <insert id="addMetrics">
+        insert into sys_instance_metrics (instance_id, metrics, sys_metrics, collect_time)
+        values (#{instanceId}, #{metrics}, #{sysMetrics}, NOW())
+    </insert>
+    <insert id="addSystemMetrics">
+        insert into user_instance_metrics(instance_id, collect_time, sys_metrics)
+        values (#{instanceId}, NOW(), #{sysMetrics})
+        on duplicate key update sys_metrics  = values(sys_metrics),
+                                collect_time = values(collect_time)
+    </insert>
+    <select id="getMetricsByInstanceId" resultType="com.dbagent.task.domain.InstanceMetrics">
+        select *
+        from user_instance_metrics
+        where instance_id = #{instanceId}
+    </select>
+    <select id="getMetrics" resultType="com.dbagent.task.domain.InstanceMetrics">
+        select id,
+               instance_id as instanceId,
+               metrics,
+               sys_metrics as sysMetrics,
+               collect_time as collectTime
+        from sys_instance_metrics
+        where instance_id = #{instanceId}
+        and collect_time between #{startTime} and #{endTime}
+        order by collect_time
+    </select>
+</mapper>
